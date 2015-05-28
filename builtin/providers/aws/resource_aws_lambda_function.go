@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/awslabs/aws-sdk-go/aws"
-	_ "github.com/awslabs/aws-sdk-go/aws/awserr"
 	"github.com/awslabs/aws-sdk-go/service/lambda"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -126,6 +125,7 @@ func resourceAwsLambdaFunctionRead(d *schema.ResourceData, meta interface{}) err
 	// getFunctionOutput.Configuration which holds metadata.
 
 	function := getFunctionOutput.Configuration
+	// TODO error checking / handling on the Set() calls.
 	d.Set("arn", function.FunctionARN)
 	d.Set("description", function.Description)
 	d.Set("handler", function.Handler)
@@ -134,8 +134,6 @@ func resourceAwsLambdaFunctionRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("role", function.Role)
 	d.Set("runtime", function.Runtime)
 	d.Set("timeout", function.Timeout)
-
-	fmt.Println(getFunctionOutput.Configuration.FunctionARN)
 
 	return nil
 }
