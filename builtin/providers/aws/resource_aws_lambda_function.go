@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,6 +27,7 @@ func resourceAwsLambdaFunction() *schema.Resource {
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true, // TODO make this editable
 			},
 			"function_name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -35,25 +37,30 @@ func resourceAwsLambdaFunction() *schema.Resource {
 			"handler": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true, // TODO make this editable
 			},
 			"memory_size": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  128,
+				ForceNew: true, // TODO make this editable
 			},
 			"role": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true, // TODO make this editable
 			},
 			"runtime": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Default:  "nodejs",
 			},
 			"timeout": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  3,
+				ForceNew: true, // TODO make this editable
 			},
 			"arn": &schema.Schema{
 				Type:     schema.TypeString,
@@ -62,6 +69,11 @@ func resourceAwsLambdaFunction() *schema.Resource {
 			"last_modified": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"source_code_hash": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -80,6 +92,7 @@ func resourceAwsLambdaFunctionCreate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
+	d.Set("source_code_hash", sha256.Sum256(zipfile))
 
 	params := &lambda.CreateFunctionInput{
 		Code: &lambda.FunctionCode{
