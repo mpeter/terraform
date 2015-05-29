@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/service/lambda"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -31,10 +32,20 @@ func TestAccAWSLambdaFunction_normal(t *testing.T) {
 func testAccCheckLambdaFunctionDestroy(s *terraform.State) error {
 	conn := testAccProvider.Meta().(*AWSClient).lambdaconn
 
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "aws_lambda_function" {
+			continue
+		}
+
+		_, err := conn.GetFunction(&lambda.GetFunctionInput{
+			FunctionName: aws.String(rs.Primary.ID),
+		})
+	}
+
 	return fmt.Errorf("Lambda Function still exists")
 }
 
-func testAccCheckAwsLambdaFunctionExists(n string, function *lambda.GetFunctionOutput) resource.TestCheckFunction {
+func testAccCheckAwsLambdaFunctionExists(n string, function *lambda.GetFunctionOutput) resource.TestCheckFunc {
 	return fmt.Errorf("Lambda Function does not exist")
 }
 
